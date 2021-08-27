@@ -114,7 +114,7 @@ def agent(observation, configuration):
         target_tile = unit.pos.translate(direction, 1)
         
         # if target_tile is not being targeted already, move there
-        if target_tile not in target_tiles or target_tile in [tile.pos for tile in citytile_cells]:
+        if target_tile not in target_tiles or target_tile in [tile.pos for tile in citytile_cells] :
             target_tiles.append(target_tile)
             actions.append(unit.move(direction))
             actions.append(annotate.line(unit.pos.x, unit.pos.y, position.x, position.y))
@@ -130,6 +130,22 @@ def agent(observation, configuration):
 
         nearest_citytile_position = find_nearest_position(unit.pos, citytile_cells)
         move_unit(unit, nearest_citytile_position)
+
+    def find_closest_city_tile(pos, player):
+        closest_city_tile = None
+        closest_dist = math.inf
+        if len(player.cities) > 0:
+        # the cities are stored as a dictionary mapping city id to the city object, which has a citytiles field that
+        # contains the information of all citytiles in that city
+            for k, city in player.cities.items():
+                for city_tile in city.citytiles:
+                    dist = city_tile.pos.distance_to(pos)
+                    if dist < closest_dist:
+                        closest_dist = dist
+                        closest_city_tile = city_tile
+        return closest_city_tile, closest_dist
+    
+    #def check_coll(pos,
 
 
     #############################
@@ -147,6 +163,8 @@ def agent(observation, configuration):
     for unit in player.units:
         if unit.is_worker() and unit.can_act():
 
+            
+
             # if night and there are cities, return home:
             if game_state.turn % 40 > 30 and len(player.cities) > 0:
                 go_home(unit)
@@ -162,9 +180,20 @@ def agent(observation, configuration):
                 if len(player.cities) == 0:
                     if unit.can_build(game_state.map):
                         actions.append(unit.build_city)
+                        
+                can_build = True
+                for city in player.cities.values():            
+                    if city.fuel / (city.get_light_upkeep() + 30) < 30:
+                        can_build = False
 
-                if len(player.cities)<5 and unit.can_build(game_state.map) : # some build condition here
-                    actions.append(unit.build_city)
+                closest_city_tile, closest_city_dist = find_closest_city_tile(unit.pos, player)
+
+                if unit.can_build(game_state.map): #and ((closest_city_dist == 1 and can_build) or (closest_city_dist is None)):
+                # build a new cityTile
+                    action = unit.build_city()
+                    actions.append(action)  
+                    can_build = False
+                    continue
 
                 else:
                     nearest_citytile_position = find_nearest_position(unit.pos, citytile_cells)

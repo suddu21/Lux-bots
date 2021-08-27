@@ -116,7 +116,7 @@ def agent(observation, configuration):
         for city_tile in city.citytiles:
             taken_tiles.add((city_tile.pos.x, city_tile.pos.y))
     
-    # we can collide in cities so we will use this tiles as exceptions
+    # we can't collide in cities so we will use this tiles as exceptions
     city_tiles = {(tile.pos.x, tile.pos.y) for city in player.cities.values() for tile in city.citytiles}
     
     
