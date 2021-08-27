@@ -163,9 +163,8 @@ def agent(observation, configuration):
                     if unit.can_build(game_state.map):
                         actions.append(unit.build_city)
 
-                if False: # some build condition here
-                    if unit.can_build(game_state.map):
-                        actions.append(unit.build_city)
+                if len(player.cities)<5 and unit.can_build(game_state.map) : # some build condition here
+                    actions.append(unit.build_city)
 
                 else:
                     nearest_citytile_position = find_nearest_position(unit.pos, citytile_cells)
